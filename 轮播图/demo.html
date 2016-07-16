@@ -1,0 +1,166 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>图片轮换效果 </title>
+	<link rel="stylesheet" type="text/css" href="style.css">
+	<script src="move.js"></script>
+	<script>
+		function getByClass(oParent, sClass)							//封装一个取class的函数
+		{
+			var aEle=oParent.getElementsByTagName('*');
+			var aResult=[];
+			
+			for(var i=0;i<aEle.length;i++)
+			{
+				if(aEle[i].className==sClass)
+				{
+					aResult.push(aEle[i]);
+				}
+			}
+			
+			return aResult;
+		}
+
+		window.onload=function ()
+		{																//实现左右按钮获取的对象
+			var oDiv=document.getElementById('playimages');				//获取ID为playimages的对象
+			var oBtnPrev=getByClass(oDiv, 'prev')[0];					//获取ID为playimages的对象里class为prev的对象
+			var oBtnNext=getByClass(oDiv, 'next')[0];
+			var oMarkLeft=getByClass(oDiv, 'mark-left')[0];
+			var oMarkRight=getByClass(oDiv, 'mark-right')[0];
+			
+			var oDivSmall=getByClass(oDiv,'small-pic')[0];
+			var oUlSmall=oDivSmall.getElementsByTagName('ul')[0];
+			var aLiSmall=oDivSmall.getElementsByTagName('li');
+			var oUlBig=getByClass(oDiv,'big-pic')[0];
+			var aLiBig=oUlBig.getElementsByTagName('li');
+			var nowZIndex=2;
+
+			var now = 0;
+			oUlSmall.style.width=aLiSmall.length*aLiSmall[0].offsetWidth+'px';//让ul宽度与总图片宽度一致，防止滚动时图片未在此行
+			
+			
+			
+			//左右按钮
+			oBtnPrev.onmouseover=oMarkLeft.onmouseover=function ()
+			{
+				startMove(oBtnPrev, 'opacity', 100);
+			};
+			oBtnPrev.onmouseout=oMarkLeft.onmouseout=function ()
+			{
+				startMove(oBtnPrev, 'opacity', 0);
+			};
+			oBtnNext.onmouseover=oMarkRight.onmouseover=function ()
+			{
+				startMove(oBtnNext, 'opacity', 100);
+			};
+			oBtnNext.onmouseout=oMarkRight.onmouseout=function ()
+			{
+				startMove(oBtnNext, 'opacity', 0);
+			};
+			//大图切换
+			for (var i = 0; i < aLiSmall.length; i++) 
+			{
+				aLiSmall[i].index=i;
+				aLiSmall[i].onclick=function()
+				{	if (this.index==now) return; 			//防止连续点击同一张图片下滑效果
+					now=this.index;
+					tab();
+
+				}
+				aLiSmall[i].onmouseover=function()
+				{
+					startMove(this,'opacity',100);
+				}
+				aLiSmall[i].onmouseout=function()
+				{
+					if (this.index!=now) 
+					{
+					startMove(this,'opacity',60);
+					}
+				}
+
+			}
+			function tab()
+			{
+				aLiBig[now].style.zIndex=nowZIndex++;   	//变图片的层级来进行替换效果
+				for (var i = 0; i < aLiSmall.length; i++) 
+				{
+					startMove(aLiSmall[i],'opacity',60)
+				}
+				startMove(aLiSmall[now],'opacity',100)
+				aLiBig[now].style.height=0;
+				startMove(aLiBig[now],'height',320);
+				if (now==0) 								//移动到第一张图片时left为0
+				{
+					startMove(oUlSmall,'left',0);
+				}
+				else if (now==aLiSmall.length-1) 			//移动到最后一张图片时left与倒数第二张一致
+				{
+					startMove(oUlSmall,'left',-(now-2)*aLiSmall[0].offsetWidth);
+				}
+				else
+				{
+				startMove(oUlSmall,'left',-(now-1)*aLiSmall[0].offsetWidth);
+				}
+			}
+			oBtnPrev.onclick=function()
+			{
+				now--;
+				if (now==-1)								//如果当前是第一张，点击到最后一张
+				{
+					now=aLiSmall.length-1;
+				}
+				tab();
+
+			}
+			oBtnNext.onclick=function()
+			{
+				now++;
+				if (now==aLiSmall.length) 					//如果当前是最后一张，点击到第一张
+				{
+					now=0;
+				}
+				tab();	
+			}
+			var timer=setInterval(oBtnNext.onclick,2000);	//自动轮播
+			oDiv.onmouseover=function()						//设置移入鼠标停在当前图片
+			{
+				clearInterval(timer);
+			}
+			oDiv.onmouseout=function()
+			{
+				timer=setInterval(oBtnNext.onclick,2000);
+			}
+		}
+	</script>
+</head>
+<body>
+	<div id="playimages" class="play">
+	    <ul class="big-pic">
+			<div class="prev"></div>
+			<div class="next"></div>
+			<a class="mark-left" href="javascript:;"></a>
+			<a class="mark-right" href="javascript:;"></a>
+			<div class="bg"></div>
+			<li class="first-big-pic"><img src="images/1.jpg" /></li>
+	        <li><img src="images/2.jpg" /></li>
+	        <li><img src="images/3.jpg" /></li>
+	        <li><img src="images/4.jpg" /></li>
+	        <li><img src="images/5.jpg" /></li>
+	        <li><img src="images/6.jpg" /></li>
+	    </ul>
+	    <div class="small-pic">
+	    <ul>
+	        <li class="first-small-pic"><img src="images/1.jpg" /></li>
+            <li><img src="images/2.jpg" /></li>
+            <li><img src="images/3.jpg" /></li>
+            <li><img src="images/4.jpg" /></li>
+            <li><img src="images/5.jpg" /></li>
+            <li><img src="images/6.jpg" /></li>
+	    </ul>
+	    </div>
+	</div>
+</body>
+</html>
